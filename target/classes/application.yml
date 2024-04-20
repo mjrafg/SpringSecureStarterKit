@@ -1,0 +1,62 @@
+server:
+  port: 8085
+
+spring:
+  datasource:
+    url: jdbc:log4jdbc:postgresql://localhost:5432/testdb
+    username: postgres
+    password: Bermood@1234
+    driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 500
+      idle-timeout: 50000
+      pool-name: SpringBootHikariCP
+      max-lifetime: 2000000
+      connection-timeout: 30000
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+    hibernate:
+      ddl-auto: create
+      naming:
+        physical-strategy: com.mjrafg.springsecurestarterkit.config.jpa.CamelCaseToUnderscoresNamingStrategy
+    show-sql: false
+  servlet:
+    multipart:
+      max-file-size: 128MB
+      max-request-size: 128MB
+
+mjr:
+  app:
+    jwtSecret: 67FDGHdsSFfgDFgASdfglsadASDflgWFpbCI6ImpybdsfGFH34SAD3@
+    jwtExpirationMs: 86400000
+
+logging:
+  pattern:
+    console: "%d %-5level %logger : %msg%n"
+  level:
+    jdbc:
+      main: off
+      sqlonly: off
+      sqltiming: info
+      resultsettable: info
+      audit: off
+      resultset: off
+      connection: off
+
+
+
+
+
+
+
+
+
