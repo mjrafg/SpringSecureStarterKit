@@ -145,5 +145,7 @@
                 </executions>
             </plugin>
         </plugins>
+        <finalName>SpringBootStarterKit</finalName>
     </build>
+
 </project>
