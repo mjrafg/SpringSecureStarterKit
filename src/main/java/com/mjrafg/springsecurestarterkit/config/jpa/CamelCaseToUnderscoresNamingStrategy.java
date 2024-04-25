@@ -3,9 +3,12 @@ package com.mjrafg.springsecurestarterkit.config.jpa;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.engine.jdbc.env.spi.JdbcEnvironment;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl;
+
+import java.io.Serial;
 import java.util.Locale;
 
 public class CamelCaseToUnderscoresNamingStrategy extends PhysicalNamingStrategyStandardImpl {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @Override
