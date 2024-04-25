@@ -59,9 +59,7 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth.requestMatchers("/api/file/display").permitAll()
-                                .requestMatchers("/api/file/download/excel").permitAll()
                                 .requestMatchers("/api/auth/**").permitAll()
-                                .requestMatchers("/api/clients/**").permitAll()
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security").permitAll()
                                 .anyRequest().authenticated()
                 );

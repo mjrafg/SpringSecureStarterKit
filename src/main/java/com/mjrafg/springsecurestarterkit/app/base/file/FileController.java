@@ -6,8 +6,6 @@ import com.mjrafg.springsecurestarterkit.payload.response.MainResponse;
 import com.mjrafg.springsecurestarterkit.utils.CommonUtils;
 import com.mjrafg.springsecurestarterkit.utils.FileUtils;
 import com.mjrafg.springsecurestarterkit.utils.MediaUtils;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -40,94 +38,87 @@ public class FileController extends BaseController<FileEntity, String> {
         this.fileService = fileService;
     }
 
-    // produces = "text/plain;charset=UTF-8" : 한국어를 정상적으로 전송하기 위한 설정
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public ResponseEntity<?> fileUploadPOST(String type,boolean dateBase,boolean isDraw , MultipartFile file) throws Exception {
+    public ResponseEntity<?> fileUploadPOST(String type, boolean dateBase, boolean isDraw, MultipartFile file) throws Exception {
+        if (file.isEmpty()) {
+            return MainResponse.error("File is empty");
+        }
         try {
-            String originalName = file.getOriginalFilename();
-
-            FileEntity fileEntity = FileUtils.uploadFile(type, originalName, file.getBytes(),dateBase);
+            FileEntity fileEntity = FileUtils.uploadFile(type, file.getOriginalFilename(), file.getBytes(), dateBase);
             fileEntity.setIsDraw(isDraw);
             FileEntity savedFile = fileService.save(fileEntity);
             return MainResponse.ok(savedFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return MainResponse.error("Upload failed");
+        } catch (IOException e) {
+            return MainResponse.error("Error uploading file: " + e.getMessage());
         }
     }
 
     @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable String id) {
-        Optional<FileEntity> optionalFile = fileService.findById(id);
-        if (optionalFile.isPresent()) {
-            FileEntity file = optionalFile.get();
-            FileUtils.deleteFile(file.getSavedName(), file.getType());
-        }
-        return super.deleteById(id);
+        return fileService.findById(id)
+                .map(file -> {
+                    FileUtils.deleteFile(file.getSavedName(), file.getType());
+                    return super.deleteById(id);
+                })
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @RequestMapping(value = "/download")
-    public ResponseEntity<?> fileDownload(@RequestParam("type") String type,@RequestParam("fileName") String fileName, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        FileSystemResource resource = null;
+    @GetMapping("/download")
+    public ResponseEntity<?> downloadFile(@RequestParam("type") String type,
+                                          @RequestParam("fileName") String fileName) {
+        if (CommonUtils.isEmpty(fileName)) {
+            return MainResponse.error("File name is required");
+        }
+
+        String filePath = FileUtils.getFilePath(type) + "/" + fileName;
+        FileSystemResource resource = new FileSystemResource(filePath);
+
+        if (!resource.exists()) {
+            return MainResponse.error("File not found");
+        }
+
+        String mimeType = URLConnection.guessContentTypeFromName(fileName);
+        mimeType = mimeType != null ? mimeType : "application/octet-stream";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
+        headers.setContentType(MediaType.parseMediaType(mimeType));
+
         try {
-            String sFilePath = FileUtils.getFilePath(type);
-            if (CommonUtils.isNotEmpty(fileName)) {
-                resource = new FileSystemResource(sFilePath +"/"+ fileName);
-                HttpHeaders headers = new HttpHeaders();
-                headers.set("Content-Disposition", "attachment; filename=\"" + new String(fileName.getBytes("EUC-KR"), "ISO-8859-1") + "\"");
-                return ResponseEntity.ok()
-                        .contentLength((int) resource.getFile().length())
-                        .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                        .body(resource);
-            } else return MainResponse.error("fileName is empty!!!");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return MainResponse.error(e.getMessage());
+            byte[] fileContent = IOUtils.toByteArray(new FileInputStream(resource.getFile()));
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(fileContent.length)
+                    .body(fileContent);
+        } catch (IOException e) {
+            return MainResponse.error("Error downloading file: " + e.getMessage());
         }
     }
 
     @GetMapping("/display")
-    public ResponseEntity<byte[]> fileDisplay(@RequestParam("type") String type, @RequestParam("fileName") String fileName) {
+    public ResponseEntity<?> displayFile(@RequestParam("type") String type,
+                                         @RequestParam("fileName") String fileName) {
         if (CommonUtils.isEmpty(fileName)) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        try {
-            String filePath = FileUtils.getFilePath(type)+"/" + fileName;
-            String formatName = fileName.substring(fileName.lastIndexOf(".") + 1);
-            MediaType mediaType = MediaUtils.getMediaType(formatName);
-            HttpHeaders headers = new HttpHeaders();
+        String filePath = FileUtils.getFilePath(type) + "/" + fileName;
+        FileSystemResource resource = new FileSystemResource(filePath);
+        if (!resource.exists()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
 
-            FileSystemResource resource = new FileSystemResource(filePath);
-            if (!resource.exists()) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
+        String formatName = fileName.substring(fileName.lastIndexOf('.') + 1);
+        MediaType mediaType = MediaUtils.getMediaType(formatName);
 
-            if (mediaType != null) {
-                // If the file is an image or media type, serve it directly
-                headers.setContentType(mediaType);
-                try (FileInputStream in = new FileInputStream(resource.getFile())) {
-                    byte[] media = IOUtils.toByteArray(in);
-                    return new ResponseEntity<>(media, headers, HttpStatus.OK);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            } else {
-                // For non-media files, trigger download
-                String mimeType = URLConnection.guessContentTypeFromName(fileName);
-                mimeType = mimeType != null ? mimeType : "application/octet-stream";
-                headers.setContentType(MediaType.parseMediaType(mimeType));
-                headers.setContentDispositionFormData("attachment", fileName);
-                headers.setContentLength(resource.contentLength());
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(mediaType != null ? mediaType : MediaType.APPLICATION_OCTET_STREAM);
 
-                try (FileInputStream in = new FileInputStream(resource.getFile())) {
-                    byte[] fileContent = IOUtils.toByteArray(in);
-                    return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
-                }
-            }
+        try (FileInputStream in = new FileInputStream(resource.getFile())) {
+            byte[] media = IOUtils.toByteArray(in);
+            return new ResponseEntity<>(media, headers, HttpStatus.OK);
         } catch (IOException e) {
-            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

@@ -30,11 +30,9 @@ import static com.mjrafg.springsecurestarterkit.config.app.AppConfig.THUMB_SIZE;
 public class FileUtils {
 //	private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
-	private static String MES_PATH= "/storages/mes";
 
-	private static String HACCP_PATH="/storages/haccp";
 
-	private static String USER_PATH;
+	private static String USER_PATH="/storage/user";
 
 
 	private static String SIGN_PATH = "/storages/user/sign";
@@ -144,20 +142,7 @@ public class FileUtils {
 		return iconName.substring(uploadPath.length()).replace(File.separatorChar, '/');
 	}
 	
-	// 송효섭 추가 - 고객코드에 따른 해당 폴더 확인
-	public static String makeDirAndCust(String cust_cd, String path) {
-		if(cust_cd != null) {
-			String custPath = path + "/" + cust_cd;
-			File dirPath = new File(custPath);
-			if (!dirPath.exists()) {
-				dirPath.mkdirs();
-			}
-			
-			return custPath;
-		}
-		
-		return path;
-	}
+
 
 	public static FileEntity uploadFile(String type, String originalName, byte[] fileData, boolean dateBase) throws Exception {
 		String uploadPath = getFilePath(type);
@@ -215,12 +200,9 @@ public class FileUtils {
 	public static String getFilePath(String type) {
 		String sFilePath = "c:/";
 		if (type.equals("FILE")) sFilePath += FILE_PATH;
-		else if (type.equals("MES")) sFilePath += MES_PATH;
 		else if (type.equals("SIGN")) sFilePath += SIGN_PATH;
 		else if (type.equals("PROFILE")) sFilePath += PROFILE_PATH;
-		else if (type.equals("HACCP")) sFilePath += HACCP_PATH;
 		else if (type.equals("USER")) sFilePath += USER_PATH;
-		else if (type.equals("FILE")) sFilePath += FILE_PATH;
 		else sFilePath += DEFAULT_PATH;
 		return sFilePath;
 	}
