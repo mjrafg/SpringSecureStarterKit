@@ -145,7 +145,7 @@
                 </executions>
             </plugin>
         </plugins>
-        <finalName>SpringBootStarterKit</finalName>
+        <finalName>spring-boot-secure-starter-kit</finalName>
     </build>
 
 </project>
