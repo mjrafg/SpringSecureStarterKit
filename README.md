@@ -1,4 +1,17 @@
-# Getting Started with Spring Secure Starter Kit
+## About This Repository
+
+This repository has been set up as a **Template Repository** to help you quickly start projects based on the Spring Secure Starter Kit. It includes configurations for JWT, PostgreSQL, JPA, and Docker, making it ideal for building secure Spring Boot applications.
+
+## Using This Template
+
+To create a new repository based on this template:
+
+1. Click the **Use this template** button at the top of this GitHub repository page.
+2. Set the owner for the repository you are creating and enter a repository name.
+3. Choose to include all branches or just the main branch as needed.
+4. Click **Create repository from template** to start with the new repository setup.
+
+## Getting Started
 
 ## Prerequisites
 
