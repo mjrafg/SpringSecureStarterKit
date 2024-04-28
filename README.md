@@ -15,6 +15,7 @@ Modify the `application.yml` to include your PostgreSQL credentials and adjust o
 ## Build and Run
 
 ### Building the Application
+
 To compile the project and build the executable JAR file, execute:
 
 ```bash
@@ -22,6 +23,7 @@ mvn clean install
 ```
 
 ### Running Locally
+
 Start the application using:
 
 ```bash
@@ -29,6 +31,7 @@ java -jar target/spring-boot-secure-starter-kit.jar
 ```
 
 ### Using Docker (Optional)
+
 To build the Docker image and run it as a container:
 
 1.Build the Docker image with:
@@ -42,6 +45,7 @@ docker build -t spring-secure-starter-kit .
 ```bash
 docker run -p 8085:8085 spring-secure-starter-kit
 ```
+
 This will start the application and make it accessible on `http://localhost:8085`.
 
 ### Accessing Swagger UI
@@ -51,5 +55,5 @@ Once the application is running, you can access the Swagger UI to interact with 
 
 ## Contact
 
-[mjrafg@yahoo.com](mailto:mjrafg@yahoo.com).
+[mjrafg@yahoo.com](mailto:mjrafg@yahoo.com)
 
