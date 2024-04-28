@@ -3,8 +3,8 @@ server:
 
 spring:
   datasource:
-    url: jdbc:log4jdbc:postgresql://localhost:5432/testdb
-    username: postgres
+    url: jdbc:log4jdbc:postgresql://192.168.0.184:5432/testdb
+    username: mjrafg
     password: Bermood@1234
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
     type: com.zaxxer.hikari.HikariDataSource
